@@ -15,22 +15,22 @@ bookmarkRouter
     const {title, url, rating, desc} = req.body;
     if(!title) {
       logger.error("Title is required");
-      res.status(400).send("Invalid data");
+      return res.status(400).send("Invalid data");
     };
 
     if(!url) {
       logger.error("url is required");
-      res.status(400).send("Invalid data");
+      return res.status(400).send("Invalid data");
     };
 
     if(!rating) {
       logger.error("Rating is required");
-      res.status(400).send("Invalid data");
+      return res.status(400).send("Invalid data");
     };
 
     if(!desc) {
       logger.error("Description is required");
-      res.status(400).send("Invalid data")
+      return res.status(400).send("Invalid data")
     };
 
     const id = uuid();
