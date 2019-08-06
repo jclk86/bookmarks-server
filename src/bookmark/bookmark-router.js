@@ -5,6 +5,7 @@ const bodyParser = express.json();
 // logger 
 const logger = require("../logger");
 const {bookmarks} = require("../store");
+const BookmarksService = require('./bookmarks-service')
 
 bookmarkRouter
   .route("/bookmarks")
@@ -53,15 +54,22 @@ bookmarkRouter
 
 bookmarkRouter
   .route("/bookmarks/:id")
-  .get((req,res) => {
+  .all((req,res, next) => { // all() is global and requires all routes with endpoint entails the bottom
     const {id} = req.params;
-    const mark = bookmarks.find(b => b.id == id); // == bc params is a string, but data is a #. 
-    if(!mark) {
+    BookmarksService.getById(req.app.get('db'), id)
+    .then(mark => {
+      if(!mark) {
       logger.error(`No bookmark with id matching ${id}`);
-      res.status(404).send(`Not found`);
-    }
-    res.json(mark);
+        return res.status(404).json({
+          error: {message: 'Bookmark Not Found'}
+        })
+      }
+      res.bookmark =  mark
+      next()
+    }) 
+    .catch(next)
   })
+
   .delete((req,res) => {
     const {id} = req.params;
     const markIndex = bookmarks.findIndex(li => li.id == id);
@@ -77,10 +85,3 @@ bookmarkRouter
 
 module.exports = bookmarkRouter;
 
-// {
-//   id: 1,
-//   title: 'Thinkful',
-//   url: 'http://www.thinkful.com',
-//   rating: '5',
-//   desc: '1-on-1 learning to accelerate your way to a new high-growth tech career!'
-// }
