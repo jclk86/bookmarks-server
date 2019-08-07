@@ -19,7 +19,7 @@ app.use(helmet());
 app.use(cors());
 
 app.use(function validateBearerToken(req,res,next) {
-    
+    // automatically set Bearer in token with you inserting it in env
     const apiToken = process.env.API_TOKEN;
     const authToken = req.get("Authorization")
 
@@ -36,7 +36,7 @@ app.get("/", (req,res) => {
     res.send("Hello, world!")
 });
 
-app.use(function errorHandler(error, req, res, next) {
+app.use(function errorHandler(error, req, res, next) { // middleware -- if an object is an error, it follows the path below. hence why it's below the ones above. They get to go first and will supply error object if it is an error object. 
     let response
     if(NODE_ENV === "production") {
         response = {error: {message: "server error"}}

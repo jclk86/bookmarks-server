@@ -1,7 +1,6 @@
 const knex = require('knex')
 const fixtures = require('./bookmarks-fixtures')
 const app = require('../src/app')
-const store = require('../src/store')
 
 describe('Bookmarks Endpoints', function() {
   let db
@@ -68,6 +67,26 @@ describe('Bookmarks Endpoints', function() {
           .expect(200, testBookmarks)
       })
 
+    })
+
+    context('Given an XSS attack bookmark', () => {
+      const { maliciousBookmark, expectedBookmark } = fixtures.makeMaliciousBookmark()
+      beforeEach('insert malicious bookmark', () => {
+        return db
+          .into('bookmarks')
+          .insert([maliciousBookmark])
+      })
+
+      it('removes XSS attack content', () => {
+        return supertest(app)
+          .get(`/bookmarks`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          .expect(200)
+          .expect(res => {
+            expect(res.body[0].title).to.eql(expectedBookmark.title)
+            expect(res.body[0].desc).to.eql(expectedBookmark.desc)
+          })
+      })
     })
   })
 
